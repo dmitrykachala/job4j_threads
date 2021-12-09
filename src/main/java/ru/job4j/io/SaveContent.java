@@ -12,7 +12,7 @@ public class SaveContent {
         this.file = file;
     }
 
-    public void saveContent(String content) {
+    public synchronized void saveContent(String content) {
         try (OutputStream o = new FileOutputStream(file)) {
             for (int i = 0; i < content.length(); i += 1) {
                 o.write(content.charAt(i));
