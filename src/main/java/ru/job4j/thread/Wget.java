@@ -6,41 +6,39 @@ import java.io.IOException;
 import java.net.URL;
 
 public class Wget implements Runnable {
-    private static final int LIMIT = 1024 * 1024;
     private final String url;
-    private final int estimatedTime;
+    private final int speed;
     private final String fileName;
 
-    public Wget(String url, int estimatedTime, String fileName) {
+    public Wget(String url, int speed, String fileName) {
         this.url = url;
-        this.estimatedTime = estimatedTime;
+        this.speed = speed;
         this.fileName = fileName;
     }
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
             try {
                 BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
                 FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-                byte[] dataBuffer = new byte[LIMIT];
+                byte[] dataBuffer = new byte[1024];
                 int bytesRead;
 
                 long bytesWrited = 0;
 
                 long startTime = System.currentTimeMillis();
-                while ((bytesRead = in.read(dataBuffer, 0, LIMIT)) != -1) {
+                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
                     bytesWrited = bytesWrited + bytesRead;
-                    if (bytesWrited == LIMIT) {
+                    if (bytesWrited >= speed) {
                         long endTime = System.currentTimeMillis();
                         long time = endTime - startTime;
-                        if (time < estimatedTime) {
-                            Thread.sleep(estimatedTime - time);
+                        if (time < 1000) {
+                            Thread.sleep(1000 - time);
                             System.out.println("Pause...");
-                            bytesWrited = 0;
-                            startTime = System.currentTimeMillis();
                         }
+                        bytesWrited = 0;
+                        startTime = System.currentTimeMillis();
                     }
                 }
 
@@ -49,7 +47,6 @@ public class Wget implements Runnable {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }
     }
 
     public static boolean validateArgs(int argsNum) throws IllegalArgumentException {
