@@ -10,59 +10,47 @@ import java.util.Queue;
 public class SimpleBlockingQueue<T> {
 
     @GuardedBy("this")
-    private Queue<T> queue = new LinkedList<>();
-    private int limit;
+    private final Queue<T> queue = new LinkedList<>();
+    private final int limit;
 
     public SimpleBlockingQueue(int limit) {
         this.limit = limit;
     }
 
-    public synchronized void offer(T value) {
-        System.out.println("Offering value: " + value + "...");
-        try {
-            while (queue.size() == limit) {
-                System.out.println("Queue is full. Waiting...");
-                wait();
-            }
-            if (queue.size() == 0) {
-                notifyAll();
-            }
-            queue.offer(value);
-            System.out.println(value + " was put.");
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
+    public synchronized void offer(T value) throws InterruptedException {
+        while (queue.size() == limit) {
+            wait();
         }
+        queue.offer(value);
+        notifyAll();
     }
 
-    public synchronized T poll() {
-        System.out.println("Polling...");
-        try {
-            while (queue.size() == 0) {
-                System.out.println("Queue is empty. Waiting...");
-                wait();
-            }
-            if (queue.size() == limit) {
-                System.out.println("Queue is full! Wake up, make a move!");
-                notifyAll();
-            }
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
+    public synchronized T poll() throws InterruptedException {
+        while (queue.size() == 0) {
+            wait();
         }
-        System.out.println(queue.poll() + " was polled.");
-        return queue.poll();
+        T el = queue.poll();
+        notifyAll();
+        return el;
     }
 
     public static void main(String[] args) throws InterruptedException {
         SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(3);
         Thread producer = new Thread(() -> {
-            System.out.println("Producer");
-            sbq.offer(1);
-            sbq.offer(2);
-            sbq.offer(3);
+            try {
+                sbq.offer(1);
+                sbq.offer(2);
+                sbq.offer(3);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
         });
         Thread consumer = new Thread(() -> {
-            System.out.println("Consumer");
-            sbq.poll();
+            try {
+                sbq.poll();
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
         });
         producer.start();
         producer.join();
