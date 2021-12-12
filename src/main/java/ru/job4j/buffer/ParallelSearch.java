@@ -10,14 +10,8 @@ public class ParallelSearch {
                 () -> {
                     while (!Thread.interrupted()) {
                         try {
-                            Integer v = queue.poll();
-                            if (v == null) {
-                                Thread.currentThread().interrupt();
-                            } else {
-                                System.out.println(v);
-                            }
+                            System.out.println(queue.poll());
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
                             Thread.currentThread().interrupt();
                         }
                     }
@@ -34,13 +28,8 @@ public class ParallelSearch {
                             e.printStackTrace();
                         }
                     }
-                    try {
-                        queue.offer(null);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                consumer.interrupt();
                 }
-
         ).start();
     }
 }
