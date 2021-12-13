@@ -34,8 +34,8 @@ public class SimpleBlockingQueue<T> {
         return el;
     }
 
-    public Queue<T> getQueue() {
-        return queue;
+    public int getQueueSize() {
+        return queue.size();
     }
 
     public int getLimit() {
