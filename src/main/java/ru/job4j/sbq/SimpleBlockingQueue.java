@@ -34,6 +34,14 @@ public class SimpleBlockingQueue<T> {
         return el;
     }
 
+    public Queue<T> getQueue() {
+        return queue;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
     public static void main(String[] args) throws InterruptedException {
         SimpleBlockingQueue<Integer> sbq = new SimpleBlockingQueue<>(3);
         Thread producer = new Thread(() -> {
