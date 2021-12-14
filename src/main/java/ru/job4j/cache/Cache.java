@@ -15,17 +15,18 @@ public class Cache {
         if (stored.getVersion() != model.getVersion()) {
             throw new OptimisticException("Versions are not equal");
         }
-        memory.computeIfPresent(model.getId(), (k, v) -> new Base(model.getId(),
-                model.getVersion() + 1));
-        return true;
+        return memory.computeIfPresent(model.getId(), (id, storedModel) -> {
+            if (stored.getVersion() != model.getVersion()) {
+                throw new OptimisticException("Versions are not equal");
+            }
+                Base nb = new Base(model.getId(), model.getVersion() + 1);
+                nb.setName(model.getName());
+                return nb;
+        }) != null;
     }
 
     public void delete(Base model) {
-        Base stored = memory.get(model.getId());
-        if (stored.getVersion() != model.getVersion()) {
-            throw new OptimisticException("Versions are not equal");
-        }
-        memory.computeIfPresent(model.getId(), (k, v) -> null);
+        memory.remove(model.getId(), model);
     }
 
     public Base get(int id) {
