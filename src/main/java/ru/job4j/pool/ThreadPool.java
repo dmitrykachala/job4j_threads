@@ -7,45 +7,46 @@ import java.util.List;
 
 public class ThreadPool {
     private final List<Thread> threads = new LinkedList<>();
-    private int size;
+    private final int size = Runtime.getRuntime().availableProcessors();
     private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(size);
 
     public ThreadPool() {
-        this.size = Runtime.getRuntime().availableProcessors();
-    }
-
-    public synchronized void run() {
         for (int i = 0; i < size; i++) {
             threads.add(new Thread(() -> {
-                try {
-                    while (tasks.getQueueSize() == 0) {
-                        Thread.currentThread().wait();
+                System.out.println("Thread started.");
+                synchronized (this) {
+                    try {
+                        while (!Thread.currentThread().isInterrupted()) {
+                            if (Thread.currentThread().getState() == Thread.State.WAITING) {
+                                notify();
+                            }
+                            if (tasks.getQueueSize() == 0) {
+                                wait();
+                            } else {
+                                tasks.poll().run();
+                            }
+                        }
+                    } catch (InterruptedException ie) {
+                        ie.printStackTrace();
                     }
-                    Thread.State ts = Thread.currentThread().getState();
-                    if (ts == Thread.State.WAITING) {
-                        notify();
-                    }
-                    tasks.poll();
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
                 }
             }));
         }
+        for (var thread : threads) {
+            thread.start();
+        }
     }
 
-    public synchronized void work(Runnable job) {
-        try {
-            tasks.offer(job);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
+    public synchronized void work(Runnable job) throws InterruptedException {
+        tasks.offer(job);
+        notifyAll();
     }
 
     public void shutdown() {
         for (var thread : threads) {
-            if (!thread.isInterrupted()) {
-                thread.interrupt();
-            }
+            thread.interrupt();
         }
     }
 }
+
+
