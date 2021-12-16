@@ -14,22 +14,13 @@ public class ThreadPool {
         for (int i = 0; i < size; i++) {
             threads.add(new Thread(() -> {
                 System.out.println("Thread started.");
-                synchronized (this) {
                     try {
                         while (!Thread.currentThread().isInterrupted()) {
-                            if (Thread.currentThread().getState() == Thread.State.WAITING) {
-                                notify();
-                            }
-                            if (tasks.getQueueSize() == 0) {
-                                wait();
-                            } else {
                                 tasks.poll().run();
-                            }
                         }
                     } catch (InterruptedException ie) {
                         ie.printStackTrace();
                     }
-                }
             }));
         }
         for (var thread : threads) {
@@ -37,9 +28,8 @@ public class ThreadPool {
         }
     }
 
-    public synchronized void work(Runnable job) throws InterruptedException {
+    public void work(Runnable job) throws InterruptedException {
         tasks.offer(job);
-        notifyAll();
     }
 
     public void shutdown() {

@@ -27,6 +27,6 @@ public class ThreadPoolTest {
             ie.printStackTrace();
         }
         tp.shutdown();
-        assertThat(buffer, is(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7)));
+        assertThat(buffer.size(), is(8));
     }
 }
