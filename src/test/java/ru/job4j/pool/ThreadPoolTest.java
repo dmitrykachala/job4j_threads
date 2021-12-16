@@ -27,6 +27,11 @@ public class ThreadPoolTest {
             ie.printStackTrace();
         }
         tp.shutdown();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         assertThat(buffer.size(), is(8));
     }
 }

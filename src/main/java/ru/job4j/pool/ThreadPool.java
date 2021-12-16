@@ -35,10 +35,6 @@ public class ThreadPool {
     public void shutdown() {
         for (var thread : threads) {
             thread.interrupt();
-            try {
-                thread.join();
-            } catch (InterruptedException ignored) {
-            }
         }
     }
 }
