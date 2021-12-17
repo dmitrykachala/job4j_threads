@@ -5,13 +5,14 @@ import java.util.concurrent.Executors;
 
 public class EmailNotification {
 
-    private String subject;
-    private String body;
     private  final ExecutorService pool = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors()
     );
 
     public void emailTo(User user) {
+
+        String subject;
+        String body;
 
         subject = "Notification " + user.getUsername() + " to email " + user.getEmail() + ".";
         body = "Add a new event to " + user.getUsername() + ".";
