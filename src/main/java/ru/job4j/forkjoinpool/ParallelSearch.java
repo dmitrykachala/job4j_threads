@@ -1,6 +1,5 @@
 package ru.job4j.forkjoinpool;
 
-import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
@@ -8,27 +7,31 @@ public class ParallelSearch extends RecursiveTask<Integer> {
 
     private final Object[] array;
     private final Object object;
+    private final int start;
+    private final int finish;
 
-    public ParallelSearch(Object[] array, Object object) {
+    public ParallelSearch(Object[] array, Object object, int start, int finish) {
         this.array = array;
         this.object = object;
+        this.start = start;
+        this.finish = finish;
     }
 
     @Override
     protected Integer compute() {
-        if (array.length <= 10) {
-            for (int i = 0; i < array.length; i++) {
+
+        if (finish - start <= 10) {
+            for (int i = start; i < finish; i++) {
                 if (array[i].equals(object)) {
                     return i;
                 }
             }
         }
-        int mid = array.length / 2;
-        Object[] leftArray = Arrays.copyOfRange(array, 0, mid);
-        Object[] rightArray = Arrays.copyOfRange(array, mid + 1, array.length - 1);
 
-        ParallelSearch leftSearch = new ParallelSearch(leftArray, object);
-        ParallelSearch rightSearch = new ParallelSearch(rightArray, object);
+        ParallelSearch leftSearch = new ParallelSearch(array, object,
+                0, array.length / 2);
+        ParallelSearch rightSearch = new ParallelSearch(array, object,
+                1 + array.length / 2, array.length - 1);
 
         leftSearch.fork();
         rightSearch.fork();
@@ -36,14 +39,17 @@ public class ParallelSearch extends RecursiveTask<Integer> {
         return leftSearch.join() + rightSearch.join();
     }
 
-    public void search() {
+    public Integer search() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
-        System.out.println(forkJoinPool.invoke(new ParallelSearch(array, object)));
+        Integer rsl = forkJoinPool.invoke(new ParallelSearch(array, object,
+                0, array.length - 1));
+        System.out.println(rsl);
+        return rsl;
     }
 
     public static void main(String[] args) {
         ParallelSearch ps = new ParallelSearch(new Integer[]{12, 124, 4, 346, 674,
-                234, 34, 7, 673, 42, 3}, 7);
+                234, 34, 7, 673, 42, 3}, 7, 0, 10);
         ps.search();
     }
 }
