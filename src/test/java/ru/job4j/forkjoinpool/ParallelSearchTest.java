@@ -28,9 +28,9 @@ public class ParallelSearchTest {
     public void whenTestPSAndFoundLast() {
         ParallelSearch ps = new ParallelSearch(new Integer[]{12, 124, 4, 346, 674,
                 234, 34, 7, 673, 42, 3, 54567, 9, 0, 878, 8, 54, 989, 3244523, 70,
-                700}, 7, 0, 20);
+                700}, 42, 0, 20);
         int rsl = ps.search();
-        assertThat(rsl, is(7));
+        assertThat(rsl, is(9));
     }
 
 }
