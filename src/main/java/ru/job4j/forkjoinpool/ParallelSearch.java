@@ -26,6 +26,7 @@ public class ParallelSearch extends RecursiveTask<Integer> {
             for (int i = start; i <= finish; i++) {
                 if (array[i].equals(object)) {
                     rsl = i;
+                    break;
                 }
             }
             return rsl;
@@ -45,7 +46,7 @@ public class ParallelSearch extends RecursiveTask<Integer> {
     public Integer search() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         Integer rsl = forkJoinPool.invoke(new ParallelSearch(array, object,
-                start, finish));
+                0, array.length - 1));
         System.out.println(rsl);
         return rsl;
     }
