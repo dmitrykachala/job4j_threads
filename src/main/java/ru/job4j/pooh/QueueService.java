@@ -5,9 +5,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class QueueService implements Service {
 
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-
     private final ConcurrentHashMap<String,
             ConcurrentLinkedQueue<String>> queue = new ConcurrentHashMap<>();
 
@@ -19,11 +16,22 @@ public class QueueService implements Service {
         String sourceName = req.getSourceName();
         String param = req.getParam();
 
-        ConcurrentLinkedQueue<String> clq = new ConcurrentLinkedQueue<>();
+        ConcurrentLinkedQueue<String> clq;
 
         if ("queue".equals(poohMode)) {
-            if (POST.equals(httpRequestType)) {
+            if ("POST".equals(httpRequestType)) {
+                if (queue.get(sourceName) != null) {
+                    clq = queue.get(sourceName);
+                    clq.add(param);
+                    queue.putIfAbsent(sourceName, clq);
+                } else {
+                    clq = new ConcurrentLinkedQueue<>();
+                }
+                clq.add(param);
                 queue.putIfAbsent(sourceName, clq);
+            } else {
+                clq = queue.get(sourceName);
+                return new Resp(clq.poll(), "200");
             }
         }
         return null;
