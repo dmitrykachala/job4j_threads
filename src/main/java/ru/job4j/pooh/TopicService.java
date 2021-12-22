@@ -10,45 +10,21 @@ public class TopicService implements Service {
 
     @Override
     public Resp process(Req req) {
-
-        String httpRequestType = req.httpRequestType();
-        String poohMode = req.getPoohMode();
-        String sourceName = req.getSourceName();
-        String param = req.getParam();
-
-        ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> chm;
-        ConcurrentLinkedQueue<String> clq;
-
-        if ("topic".equals(poohMode)) {
-            if ("POST".equals(httpRequestType)) {
-                for (var key : topics.keySet()) {
-                    if (topics.get(key).get(sourceName) != null) {
-                        chm = topics.get(key);
-                        clq = chm.get(sourceName);
-                        clq.add(param);
-                        chm.putIfAbsent(sourceName, clq);
-                        topics.putIfAbsent(key, chm);
-                    }
-                }
-            } else {
-                if (topics.get(param) != null) {
-                    if (topics.get(param).get(sourceName) != null) {
-                        clq = topics.get(param).get(sourceName);
-                        return new Resp(clq.poll(), "200");
-                    }
-                    clq = new ConcurrentLinkedQueue<>();
-                    clq.add("");
-                    return new Resp(clq.poll(), "204");
-                }
-                chm = new ConcurrentHashMap<>();
-                clq = new ConcurrentLinkedQueue<>();
-                clq.add("");
-                chm.putIfAbsent(sourceName, clq);
-                topics.putIfAbsent(param, chm);
-                return new Resp(clq.poll(), "204");
-            }
+        Resp resp;
+        if (req.httpRequestType().equalsIgnoreCase("post")) {
+            topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
+            topics.get(req.getSourceName()).values().forEach(q -> q.add(req.getParam()));
+            resp = new Resp("", "200 OK");
+        } else if (req.httpRequestType().equalsIgnoreCase("get")) {
+            topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
+            topics.get(req.getSourceName()).putIfAbsent(req.getParam(),
+                    new ConcurrentLinkedQueue<>());
+            var text = topics.get(req.getSourceName()).get(req.getParam()).poll();
+            resp = new Resp(text == null ? "" : text, text == null ? "204 EMPTY" : "200 OK");
+        } else {
+            resp = new Resp("", "501 Not Implemented");
         }
-        return null;
+        return resp;
     }
 }
 

@@ -10,31 +10,18 @@ public class QueueService implements Service {
 
     @Override
     public Resp process(Req req) {
-
-        String httpRequestType = req.httpRequestType();
-        String poohMode = req.getPoohMode();
-        String sourceName = req.getSourceName();
-        String param = req.getParam();
-
-        ConcurrentLinkedQueue<String> clq;
-
-        if ("queue".equals(poohMode)) {
-            if ("POST".equals(httpRequestType)) {
-                if (queue.get(sourceName) != null) {
-                    clq = queue.get(sourceName);
-                    clq.add(param);
-                    queue.putIfAbsent(sourceName, clq);
-                } else {
-                    clq = new ConcurrentLinkedQueue<>();
-                }
-                clq.add(param);
-                queue.putIfAbsent(sourceName, clq);
-            } else {
-                clq = queue.get(sourceName);
-                return new Resp(clq.poll(), "200");
-            }
+        Resp resp;
+        if ("POST".equals(req.httpRequestType())) {
+            queue.putIfAbsent(req.getSourceName(), new ConcurrentLinkedQueue<>());
+            queue.get(req.getSourceName()).add(req.getParam());
+            resp = new Resp("", "200 OK");
+        } else if ("GET".equals(req.httpRequestType())) {
+            var text = queue.get(req.getSourceName()).poll();
+            resp = new Resp(text == null ? "" : text, text == null ? "204 EMPTY" : "200 OK");
+        } else {
+            resp = new Resp("", "501 Not Implemented");
         }
-        return null;
+        return resp;
     }
 
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> getQueue() {
