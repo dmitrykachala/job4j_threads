@@ -11,11 +11,11 @@ public class TopicService implements Service {
     @Override
     public Resp process(Req req) {
         Resp resp;
-        if (req.httpRequestType().equalsIgnoreCase("post")) {
+        if ("POST".equals(req.httpRequestType())) {
             topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
             topics.get(req.getSourceName()).values().forEach(q -> q.add(req.getParam()));
             resp = new Resp("", "200 OK");
-        } else if (req.httpRequestType().equalsIgnoreCase("get")) {
+        } else if ("GET".equals(req.httpRequestType())) {
             topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
             topics.get(req.getSourceName()).putIfAbsent(req.getParam(),
                     new ConcurrentLinkedQueue<>());
