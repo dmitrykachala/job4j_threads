@@ -14,9 +14,9 @@ public class UserGenerator implements Generate {
     public static final String SEPARATOR = " ";
     public static final Integer NEW_USERS = 1000;
 
-    public static List<String> names;
-    public static List<String> surnames;
-    public static List<String> patrons;
+    private static List<String> names;
+    private static List<String> surnames;
+    private static List<String> patrons;
     private static List<User> users = new ArrayList<>();
     private Random random;
 
@@ -52,5 +52,29 @@ public class UserGenerator implements Generate {
 
     public static List<User> getUsers() {
         return users;
+    }
+
+    public static List<String> getNames() {
+        return names;
+    }
+
+    public static void setNames(List<String> names) {
+        UserGenerator.names = names;
+    }
+
+    public static List<String> getSurnames() {
+        return surnames;
+    }
+
+    public static void setSurnames(List<String> surnames) {
+        UserGenerator.surnames = surnames;
+    }
+
+    public static List<String> getPatrons() {
+        return patrons;
+    }
+
+    public static void setPatrons(List<String> patrons) {
+        UserGenerator.patrons = patrons;
     }
 }
