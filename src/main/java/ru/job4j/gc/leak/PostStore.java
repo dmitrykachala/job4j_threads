@@ -12,7 +12,7 @@ public class PostStore {
     private final AtomicInteger atomicInteger = new AtomicInteger(1);
 
     public Post add(Post post) {
-        Integer id = atomicInteger.getAndIncrement();
+        int id = atomicInteger.getAndIncrement();
         post.setId(id);
         POSTS.put(id, post);
         return post;
